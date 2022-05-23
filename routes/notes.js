@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const { readAndAppend, readFromFile, writeToFile } = require('../helpers/fsUtils');
-const uuidv1 = require('uuidv1');
+const { readAndAppend, readFromFile, writeToFile } = require('../helpers/fs');
+// const uuidv1 = require('uuidv1');
 
 // GET "/api/notes" responds with all notes from the database
 router.get('/', (req, res) => {
