@@ -1,33 +1,28 @@
-const express = require('express');
-const path = require('path');
-const api = require('./routes/index');
-
-const PORT = process.env.PORT || 3001;
+import express from 'express';
+import path from 'path';
+import { api } from './routes/index.js';
 
 const app = express();
+const PORT = process.env.PORT || 3001;
 
-// Middleware for parsing JSON and urlencoded form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api', api);
 
 app.use(express.static('public'));
 
-// GET Route for homepage
 app.get('/', (req, res) =>
-  res.sendFile(path.join(__dirname, '/public/index.html'))
+  res.sendFile(path.join(path.dirname('.'), 'public', 'index.html'), { root: path.join(path.dirname('.'))})
 );
 
-// GET Route for notes page
-app.get('/notes', (req, res) => {
-  res.sendFile(path.join(__dirname, '/public/notes.html'));
-});
+app.get('/notes', (req, res) => 
+  res.sendFile(path.join(path.dirname('.'), 'public', 'notes.html'), { root: path.join(path.dirname('.'))})
+);
 
-// Wildcard route to direct users back to index if they enter an invalid url
-app.get('*', (req, res) =>
-  res.sendFile(path.join(__dirname, '/public/index.html'))
+app.get('*', (req, res) => 
+  res.sendFile(path.join(path.dirname('.'), 'public', '404.html'), { root: path.join(path.dirname('.'))})
 );
 
 app.listen(PORT, () =>
-  console.log(`App listening at http://localhost:${PORT} 🚀`)
+  console.log(`App listening at http://localhost:${PORT} 👁`)
 );

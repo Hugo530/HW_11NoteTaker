@@ -1,9 +1,8 @@
-const express = require('express');
+import express from 'express';
+import { notes } from './notes.js';
 
-const notesRouter = require('./notes');
+const api = express();
 
-const app = express();
+api.use('/notes', notes);
 
-app.use('/notes', notesRouter);
-
-module.exports = app;
+export { api }

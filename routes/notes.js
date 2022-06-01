@@ -1,58 +1,75 @@
-const router = require('express').Router();
-const { readAndAppend, readFromFile, writeToFile } = require('../helpers/fs');
-// const uuidv1 = require('uuidv1');
+import { Router } from 'express';
+import { v4 as uuidv4 } from 'uuid';
+import { readFile, writeFile, appendFile } from 'fs/promises';
 
-// GET "/api/notes" responds with all notes from the database
-router.get('/', (req, res) => {
-  readFromFile('./db/db.json').then((data) => res.json(JSON.parse(data)));
+const notes = Router();
+
+notes.get('/', async (req, res) => {
+    try {
+        const data = await readFile('./db/db.json') || [];
+        res.json(JSON.parse(data));
+    } catch (err) {
+        console.error(`Error: couldn't read file - ${err}`);
+    }
 });
 
-router.get('/:id', (req, res) => {
-  const id = req.params.id;
-  readFromFile('./db/db.json')
-    .then((data) => JSON.parse(data))
-    .then((json) => {
-      const result = json.filter((note) => notes.id === id);
-      return result.length > 0
-        ? res.json(result)
-        : res.json('No note with that id');
-    });
+notes.get('/:id', async (req, res) => {
+
+    const noteId = req.params.id;
+
+    try {
+        const data = await readFile('./db/db.json') || [];
+        const notes = JSON.parse(data);
+        const requestedNote = notes.filter(note => note.id === noteId);
+        
+        if (requestedNote.length > 0) {
+            return res.json(requestedNote);
+        }
+
+        return res.json('No note with that ID');
+
+    } catch (err) {
+        console.error(`Error: couldn't read file - ${err}`);
+    }
 });
 
-// POST Route for a new UX/UI note
-router.post('/', (req, res) => {
-  console.log(req.body);
+notes.post('/', async (req, res) => {
 
-  const { title, text } = req.body;
+    try {
+        const { title, text } = req.body;
 
-  if (req.body) {
-    const newnote = {
-      title,
-      text,
-      id: uuidv1(),
-    };
+        if (req.body) {
+            const newNote = {
+                title,
+                text,
+                id: uuidv4()
+            }
 
-    readAndAppend(newnote, './db/db.json');
-    res.json(`note added successfully 🚀`);
-  } else {
-    res.error('Error in adding note');
-  }
+            const data = await readFile('./db/db.json') || [];
+            const notesDb = JSON.parse(data);
+            notesDb.push(newNote);
+            await writeFile('./db/db.json', JSON.stringify(notesDb));
+            res.json(`Note added - ${newNote}`);
+
+        } else {
+            res.error(`Note incomplete - ${req.body}`);
+        }
+    } catch (err) {
+        console.error(`Error: couldn't write file - ${err}`);
+    }
 });
 
-router.delete('/:id', (req, res) => {
-  const id = req.params.id;
-  readFromFile('./db/db.json')
-    .then((data) => JSON.parse(data))
-    .then((json) => {
-      // Make a new array of all notes except the one with the id provided in the URL
-      const result = json.filter((note) => note.id !== id);
-
-      // Save that array to the filesystem
-      writeToFile('./db/db.json', result);
-
-      // Respond to the DELETE request
-      res.json(`Item ${id} has been deleted 🗑️`);
-    });
+notes.delete('/:id', async (req, res) => {
+    try {
+        const noteId = req.params.id;
+        const data = await readFile('./db/db.json') || [];
+        const noteDb = JSON.parse(data);
+        const noteRemoved = noteDb.filter(note => note.id !== noteId);
+        await writeFile('./db/db.json', JSON.stringify(noteRemoved));
+        res.json(`Note ${noteId} deleted`);
+    } catch (err) {
+        console.error(`Error: unable to delete note - ${err}`);
+    }
 });
 
-module.exports = router;
+export { notes };
