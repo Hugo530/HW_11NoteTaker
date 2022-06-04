@@ -17,7 +17,7 @@
 ## Description
 It allows a user to enter notes that are persistent (saved to the server) and view their previously saved notes. It also allows the user to delete notes no longer desired.
 
-Feel free to try out the [Deployed Application](https://arcane-wildwood-85430.herokuapp.com/)
+Feel free to try out the [Deployed Application](https://note-taker512.herokuapp.com/)
 
 ![Gif of webpage](./images/Notetaker.png)
     
